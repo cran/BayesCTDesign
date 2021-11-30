@@ -319,12 +319,13 @@ pwetrialsimulator <- function(sample_size_val, hist_data, lambda_vec_val, time_v
       }
       new_breaks <- as.vector(temp_breaks)
     }
+    new_breaks2 <- c(0, new_breaks, censor_value)
     # The values in new_breaks create length(new_breaks)+1 time intervals. Each must have a
     # modeled hazard parameter.  Also the last parameter passed to the model fitting routine
     # will be the log hazard ratio.
 
     # Generate initial values for your call to optim()
-    chk_model <- eha::phreg(survival::Surv(event_time, status) ~ treatment, data = sampleranddata, dist = "pch", cuts = new_breaks)
+    chk_model <- eha::pchreg(survival::Surv(event_time, status) ~ treatment, data = sampleranddata, cuts = new_breaks2)
     rc_hazards <- c(chk_model$hazards)
     rand_hr <- exp(chk_model$coefficients)
 
@@ -481,12 +482,13 @@ pwetrialsimulatornohist <- function(sample_size_val, lambda_vec_val, time_vec_va
       }
       new_breaks <- as.vector(temp_breaks)
     }
+    new_breaks2 <- c(0, new_breaks, censor_value)
     # The values in new_breaks create length(new_breaks)+1 time intervals. Each must have a
     # modeled hazard parameter.  Also the last parameter passed to the model fitting routine
     # will be the log hazard ratio.
 
     # Generate initial values for your call to optim()
-    chk_model <- eha::phreg(survival::Surv(event_time, status) ~ treatment, data = sampleranddata, dist = "pch", cuts = new_breaks)
+    chk_model <- eha::pchreg(survival::Surv(event_time, status) ~ treatment, data = sampleranddata, cuts = new_breaks2)
 
     # Extract model parameters and statistics
     rc_hazards <- c(chk_model$hazards)
@@ -582,10 +584,11 @@ pwe_sim <- function(trial_reps=100, subj_per_arm, a0_vals, effect_vals,
     # variance of hazard ratio, bias, and mse.  Using a piece-wise
     # exponential oucome and incorporating data from historical controls.
     # --------------------------------------------------------------- #
+    time_vec_val2 <- c(0, time_vec_val, censor_value)
 
     # Need to take the historical data and generate distributional parameter estimates
     hist_data <- hist_control_data
-    chk_model <- eha::phreg(survival::Surv(event_time, status) ~ 1, data = hist_data, dist = "pch", cuts = time_vec_val)
+    chk_model <- eha::pchreg(survival::Surv(event_time, status) ~ 1, data = hist_data, cuts = time_vec_val2)
     hc_hazards <- c(chk_model$hazards)
 
     # Initialize arrays to hold power, mse, and bias estimate results as requested.
